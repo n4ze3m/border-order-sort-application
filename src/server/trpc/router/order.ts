@@ -17,6 +17,7 @@ const generateFakeLocation = () => {
 }
 
 
+
 const fakeAddress = () => {
     const { lat, long, postcode } = generateFakeLocation();
     return {
@@ -27,6 +28,23 @@ const fakeAddress = () => {
     }
 }
 
+// calculate distance between two points in km
+const distance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const p = 0.017453292519943295; // Math.PI / 180
+    const c = Math.cos;
+    const a = 0.5 - c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) *
+        (1 - c((lon2 - lon1) * p)) / 2;
+
+    return 12742 * Math.asin(Math.sqrt(a)); // 2 * R; R = 6371 km
+}
+
+const formatDistance = (distance: number) => {
+    if (distance < 1) {
+        return `${Math.round(distance * 1000)}m`;
+    }
+    return `${distance.toFixed(1)}km`;
+}
 
 export const orderRouter = router({
     generateDelivery: publicProcedure.mutation(async ({ ctx }) => {
@@ -84,6 +102,8 @@ export const orderRouter = router({
             },
         })
 
+        
+
         // sort delivery by latitute and longitude
         const sortedDelivery = delivery.sort((a, b) => {
             const aLat = a.latitude;
@@ -95,6 +115,11 @@ export const orderRouter = router({
             const bDistance = Math.sqrt(Math.pow(bLat - HUB_LATITUDE, 2) + Math.pow(bLong - HUB_LONGITUDE, 2));
 
             return aDistance - bDistance;
+        }).map((d) => {
+            return {
+                ...d,
+                distance: formatDistance(distance(d.latitude, d.longitude, HUB_LATITUDE, HUB_LONGITUDE)),
+            }
         })
 
         return {

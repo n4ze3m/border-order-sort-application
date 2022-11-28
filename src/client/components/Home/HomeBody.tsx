@@ -63,9 +63,13 @@ export const HomeBody = () => {
                                                 <Badge color="red">COD</Badge> :
                                                 <Badge color="green">Prepaid</Badge>
                                         }
+                                        
                                         <Text>
                                             {`₹ ${order.order.price}`}
                                         </Text>
+                                        {
+                                            order.distance
+                                        }
                                         <UnstyledButton
                                         onClick={() => {
                                             // open google maps with lat and long
